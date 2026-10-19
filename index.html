@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<!--
+  © 2026 Falado Impresa Edile S.r.l. - Tutti i diritti riservati.
+  Codice proprietario. Non e' concessa alcuna licenza d'uso, copia,
+  modifica o redistribuzione senza autorizzazione scritta del titolare.
+-->
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Falado - Presenze e Attrezzi</title>
+<meta name="description" content="Presenze, attrezzi, operai e cantieri: tutto il cantiere in un'unica schermata.">
+<meta name="theme-color" content="#1d1d1f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Falado">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<style>
+:root{--giallo:#f5b301;--nero:#1d1d1f;--verde:#1e8e3e;--rosso:#c5221f;--grigio:#6e6e73;--bordo:#e4e0da;--sfondo:#f7f4ef}
+*{box-sizing:border-box}
+body{margin:0;background:var(--sfondo);color:var(--nero);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:860px;margin:0 auto;padding:20px 16px 40px}
+header.top{display:flex;align-items:center;gap:12px;margin-bottom:4px}
+header.top img{width:44px;height:44px;border-radius:10px}
+h1{font-size:32px;margin:0}
+.data{color:var(--grigio);font-size:15px;margin:2px 0 6px;text-transform:capitalize}
+.intro{font-size:15px;color:var(--grigio);margin:0 0 18px}
+h2{font-size:22px;margin:26px 0 10px}
+caption,.cap{display:block;font-size:13px;color:var(--grigio);margin:8px 0}
+.tiles{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:12px}
+.tile{background:var(--nero);color:#fff;border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:2px}
+.tile-num{font-size:30px;font-weight:700;line-height:1.1;color:var(--giallo)}
+.tile-label{font-size:14px;color:#d8d4ce}
+.lista{display:flex;flex-direction:column;gap:8px}
+.riga{display:flex;align-items:center;gap:12px;border:1px solid var(--bordo);border-radius:12px;padding:12px 14px;background:#fff}
+.riga-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.riga-main strong{font-size:16px}
+.riga-sub{font-size:13px;color:var(--grigio);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.riga-orari{display:flex;gap:6px}
+.orario{font-variant-numeric:tabular-nums;font-weight:600;font-size:14px;background:#f0ece6;border-radius:8px;padding:4px 8px}
+.orario.off{color:#b0aaa2;font-weight:400}
+.codice{font-weight:700;font-size:14px;color:var(--grigio);white-space:nowrap}
+.stato{width:12px;height:12px;border-radius:50%;flex:none;background:#cfc9c0}
+.stato.ok{background:var(--verde)}.stato.warn{background:var(--giallo)}.stato.bad{background:var(--rosso)}
+.riga-cantiere{flex-wrap:wrap}
+.riga-azioni{display:flex;gap:8px}
+.cerca{width:100%;font-size:16px;padding:12px 14px;border:1px solid var(--bordo);border-radius:12px;margin-bottom:8px;background:#fff}
+.azioni{display:grid;grid-template-columns:1fr;gap:10px}
+.btn{display:block;text-align:center;text-decoration:none;font-size:17px;font-weight:700;padding:14px 16px;border-radius:12px;border:none;cursor:pointer;color:var(--nero);background:#f0ece6}
+.btn-add{background:var(--verde);color:#fff}
+.btn-del{background:var(--rosso);color:#fff}
+.btn-ghost{background:#f0ece6;color:var(--nero)}
+.btn-small{font-size:14px;padding:8px 12px;font-weight:600}
+.btn:disabled{opacity:.6}
+button.btn{width:100%;font-family:inherit}
+.foto{width:56px;height:56px;object-fit:cover;border-radius:10px;flex:none;background:#eee}
+.foto-mancante{display:flex;align-items:center;justify-content:center;text-align:center;font-size:10px;line-height:1.2;color:#999;padding:2px}
+.warn-box{background:#fff4d6;border:2px solid #e0a800;border-radius:12px;padding:12px 14px;font-size:15px;margin:10px 0}
+footer{margin-top:34px;font-size:12px;color:var(--grigio);text-align:center;line-height:1.6}
+@media (min-width:700px){
+ .tiles{grid-template-columns:repeat(4,1fr)}
+ .azioni{grid-template-columns:repeat(2,1fr)}
+ .lista{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;align-items:start}
+}
+@media (min-width:1024px){.lista{grid-template-columns:repeat(3,1fr)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="top"><img src="icon-192.png" alt="Logo Falado"><div><h1>Falado</h1><div class="data" id="dataIta"></div></div></header>
+<p class="intro">Presenze, attrezzi, operai e cantieri: tutto il cantiere in un'unica schermata.</p>
+<div id="err" class="warn-box" style="display:none"></div>
+
+<h2>Quadro</h2>
+<div class="tiles" id="tiles">
+ <div class="tile"><span class="tile-num" id="t-pres">…</span><span class="tile-label">presenti oggi</span></div>
+ <div class="tile"><span class="tile-num" id="t-operai">…</span><span class="tile-label">operai</span></div>
+ <div class="tile"><span class="tile-num" id="t-cant">…</span><span class="tile-label">cantieri</span></div>
+ <div class="tile"><span class="tile-num" id="t-attr">…</span><span class="tile-label">attrezzi</span></div>
+</div>
+<button class="btn btn-ghost" id="reload">Aggiorna i dati</button>
+
+<h2>Presenze di oggi</h2>
+<div class="cap" id="pres-cap">Caricamento…</div>
+<div class="lista" id="pres-lista"></div>
+
+<h2>Attrezzi</h2>
+<input class="cerca" id="cerca" type="search" placeholder="Cerca per nome, codice o cantiere…">
+<div class="cap" id="attr-cap"></div>
+<div class="lista" id="attr-lista"></div>
+
+<h2>Cantieri</h2>
+<div class="lista" id="cant-lista"></div>
+<div class="cap">I QR dei cartelli aprono direttamente la timbratura del cantiere.</div>
+
+<h2>Gestione</h2>
+<div class="azioni" id="gestione"></div>
+<div class="cap">Ogni eliminazione chiede conferma e sposta i dati in archivio: niente va perso.</div>
+
+<h2>Fogli Google</h2>
+<div class="azioni">
+ <a class="btn btn-ghost" target="_blank" rel="noopener" href="https://docs.google.com/spreadsheets/d/1EjjxnBBGn_3PyagKpODIznaGpmzoPWskKet8SpnQtLk/edit">Registro presenze</a>
+ <a class="btn btn-ghost" target="_blank" rel="noopener" href="https://docs.google.com/spreadsheets/d/1sTRxrvTP276Bvss1IORhVKVQIyQGsrX6Rk9AMXFzSu8/edit">Registro attrezzi</a>
+ <a class="btn btn-ghost" target="_blank" rel="noopener" href="https://docs.google.com/spreadsheets/d/1JpEx9YTqzAFwvtuVVnt0cy1C1HcDkeXv3ms8qLxcIzc/edit">Operai e cantieri</a>
+</div>
+
+<footer>© 2026 Falado Impresa Edile S.r.l. - Tutti i diritti riservati.<br>I dati arrivano in diretta dai fogli Google di Falado.</footer>
+</div>
+<script>
+var EXEC='https://script.google.com/macros/s/AKfycbwxdeuurqNsT0SYGNUxdw8d_Dq-5jdFzuDph5ZEVorRhZ-3IDDaCNG79Emkq_Mda6py/exec';
+var KEY='a664941690cf2f9b01ce';
+var PRESENZE_APP='https://files.instinct.com/4eehmq5i22l8-presenze-cantiere?c=';
+var CODICI_ESEMPIO=['ATR-001','ATR-002','ATR-003'];
+var quadro=null, foto={};
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function adminUrl(kind,op){return EXEC+'?action=ui&kind='+kind+'&op='+op+'&k='+KEY;}
+function mapsUrl(c){var q=c.indirizzo&&c.indirizzo.trim()?c.indirizzo:c.nome;return 'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(q);}
+function statoClass(s){var v=(s||'').toLowerCase();if(v.indexOf('funz')===0)return'ok';if(v.indexOf('manut')===0)return'warn';if(v.indexOf('rott')===0)return'bad';return'none';}
+function attrezziOk(){return quadro?quadro.attrezzi.filter(function(a){return CODICI_ESEMPIO.indexOf(a.codice)===-1;}):[];}
+function render(){
+ if(!quadro)return;
+ var pres=Object.keys(quadro.presenze).map(function(k){return quadro.presenze[k];}).sort(function(a,b){return(a.e&&b.e)?a.e.t.localeCompare(b.e.t):a.nome.localeCompare(b.nome);});
+ var att=attrezziOk();
+ document.getElementById('t-pres').textContent=pres.length;
+ document.getElementById('t-operai').textContent=quadro.operai.length;
+ document.getElementById('t-cant').textContent=quadro.cantieri.length;
+ document.getElementById('t-attr').textContent=att.length;
+ document.getElementById('dataIta').textContent=new Date(quadro.day+'T12:00:00').toLocaleDateString('it-IT',{weekday:'long',day:'numeric',month:'long'});
+ document.getElementById('pres-cap').textContent=pres.length?'':'Nessuna timbratura registrata oggi.';
+ document.getElementById('pres-lista').innerHTML=pres.map(function(p){
+   return '<div class="riga"><div class="riga-main"><strong>'+esc(p.nome)+'</strong><span class="riga-sub">'+esc(p.e?p.e.c:'')+'</span></div><div class="riga-orari"><span class="'+(p.e?'orario':'orario off')+'">E '+(p.e?p.e.t:'--:--')+'</span><span class="'+(p.u?'orario':'orario off')+'">U '+(p.u?p.u.t:'--:--')+'</span></div></div>';
+ }).join('');
+ renderAttrezzi();
+ document.getElementById('cant-lista').innerHTML=quadro.cantieri.map(function(c){
+   return '<div class="riga riga-cantiere"><div class="riga-main"><strong>'+esc(c.nome)+'</strong>'+(c.indirizzo?'<span class="riga-sub">'+esc(c.indirizzo)+'</span>':'')+'</div><div class="riga-azioni"><a class="btn btn-small" target="_blank" rel="noopener" href="'+PRESENZE_APP+encodeURIComponent(c.slug||'')+'">Timbratura</a><a class="btn btn-small btn-ghost" target="_blank" rel="noopener" href="'+mapsUrl(c)+'">Mappa</a></div></div>';
+ }).join('');
+}
+function renderAttrezzi(){
+ var q=document.getElementById('cerca').value.trim().toLowerCase();
+ var att=attrezziOk();
+ var vis=q?att.filter(function(a){return (a.codice+' '+a.nome+' '+a.categoria+' '+a.cantiere+' '+a.chi).toLowerCase().indexOf(q)!==-1;}):att;
+ document.getElementById('attr-cap').textContent=vis.length+' attrezzi'+(vis.length!==att.length?' di '+att.length:'');
+ document.getElementById('attr-lista').innerHTML=vis.map(function(a){
+   var f=foto[a.codice]?'<img class="foto" src="'+foto[a.codice]+'" alt="" loading="lazy">':'<span class="foto foto-mancante">'+(a.foto?'…':'Foto mancante')+'</span>';
+   return '<div class="riga">'+f+'<span class="stato '+statoClass(a.stato)+'"></span><div class="riga-main"><strong>'+esc(a.nome)+'</strong><span class="riga-sub">'+esc(a.cantiere)+(a.chi&&a.chi!=='-'?' · '+esc(a.chi):'')+'</span></div><span class="codice">'+esc(a.codice)+'</span></div>';
+ }).join('')||'<div class="cap">Nessun attrezzo trovato.</div>';
+}
+function carica(){
+ var b=document.getElementById('reload');b.disabled=true;b.textContent='Aggiorno…';
+ document.getElementById('err').style.display='none';
+ fetch(EXEC+'?action=quadro',{cache:'no-store'}).then(function(r){return r.json();}).then(function(d){
+   if(!d||!d.ok)throw new Error('risposta non valida');
+   quadro=d;render();
+   fetch(EXEC+'?action=foto',{cache:'no-store'}).then(function(r){return r.json();}).then(function(fd){
+     if(fd&&fd.ok&&fd.foto){Object.keys(fd.foto).forEach(function(k){foto[k]='data:image/jpeg;base64,'+fd.foto[k];});renderAttrezzi();}
+   }).catch(function(){});
+ }).catch(function(e){
+   var el=document.getElementById('err');el.style.display='block';el.textContent='Non riesco a leggere i dati. Controlla la connessione e riprova.';
+ }).finally(function(){b.disabled=false;b.textContent='Aggiorna i dati';});
+}
+document.getElementById('reload').onclick=carica;
+document.getElementById('cerca').oninput=renderAttrezzi;
+document.getElementById('gestione').innerHTML=
+ '<a class="btn btn-add" target="_blank" rel="noopener" href="'+adminUrl('attrezzi','add')+'">Aggiungi attrezzo</a>'+
+ '<a class="btn btn-del" target="_blank" rel="noopener" href="'+adminUrl('attrezzi','del')+'">Elimina attrezzo</a>'+
+ '<a class="btn btn-add" target="_blank" rel="noopener" href="'+adminUrl('operai','add')+'">Aggiungi operaio</a>'+
+ '<a class="btn btn-del" target="_blank" rel="noopener" href="'+adminUrl('operai','del')+'">Elimina operaio</a>'+
+ '<a class="btn btn-add" target="_blank" rel="noopener" href="'+adminUrl('cantieri','add')+'">Aggiungi cantiere</a>'+
+ '<a class="btn btn-del" target="_blank" rel="noopener" href="'+adminUrl('cantieri','del')+'">Elimina cantiere</a>';
+carica();
+</script>
+</body>
+</html>
