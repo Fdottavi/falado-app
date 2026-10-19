@@ -58,6 +58,7 @@ caption,.cap{display:block;font-size:13px;color:var(--grigio);margin:8px 0}
 button.btn{width:100%;font-family:inherit}
 .foto{width:56px;height:56px;object-fit:cover;border-radius:10px;flex:none;background:#eee}
 .foto-mancante{display:flex;align-items:center;justify-content:center;text-align:center;font-size:10px;line-height:1.2;color:#999;padding:2px}
+.pausa-sel{font-size:13px;padding:5px 6px;border:1px solid var(--bordo);border-radius:8px;background:#fff;max-width:118px;font-family:inherit}
 .warn-box{background:#fff4d6;border:2px solid #e0a800;border-radius:12px;padding:12px 14px;font-size:15px;margin:10px 0}
 footer{margin-top:34px;font-size:12px;color:var(--grigio);text-align:center;line-height:1.6}
 @media (min-width:700px){
@@ -120,6 +121,15 @@ function adminUrl(kind,op){return EXEC+'?action=ui&kind='+kind+'&op='+op+'&k='+K
 function mapsUrl(c){var q=c.indirizzo&&c.indirizzo.trim()?c.indirizzo:c.nome;return 'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(q);}
 function statoClass(s){var v=(s||'').toLowerCase();if(v.indexOf('funz')===0)return'ok';if(v.indexOf('manut')===0)return'warn';if(v.indexOf('rott')===0)return'bad';return'none';}
 function attrezziOk(){return quadro?quadro.attrezzi.filter(function(a){return CODICI_ESEMPIO.indexOf(a.codice)===-1;}):[];}
+function pausaMin(v){return v==='30min'?30:v==='saltata'?0:60;}
+function oreNette(p,pz){if(!p.e||!p.u)return null;function m(t){var a=t.split(':');return +a[0]*60+ +a[1];}var net=m(p.u.t)-m(p.e.t)-pausaMin(pz);return net>0?String((net/60).toFixed(1)).replace('.',',').replace(',0','')+' h':null;}
+function salvaPausa(nome,v){
+ var sel=document.querySelector('select[data-n="'+CSS.escape(nome)+'"]');if(sel)sel.disabled=true;
+ fetch(EXEC+'?action=pausa&nome='+encodeURIComponent(nome)+'&v='+v,{cache:'no-store'}).then(function(r){return r.json();}).then(function(d){
+   if(d&&d.ok&&quadro){quadro.pause=quadro.pause||{};quadro.pause[nome.toLowerCase()]=v;render();}
+   else if(sel){sel.disabled=false;}
+ }).catch(function(){if(sel)sel.disabled=false;});
+}
 function render(){
  if(!quadro)return;
  var pres=Object.keys(quadro.presenze).map(function(k){return quadro.presenze[k];}).sort(function(a,b){return(a.e&&b.e)?a.e.t.localeCompare(b.e.t):a.nome.localeCompare(b.nome);});
@@ -131,7 +141,9 @@ function render(){
  document.getElementById('dataIta').textContent=new Date(quadro.day+'T12:00:00').toLocaleDateString('it-IT',{weekday:'long',day:'numeric',month:'long'});
  document.getElementById('pres-cap').textContent=pres.length?'':'Nessuna timbratura registrata oggi.';
  document.getElementById('pres-lista').innerHTML=pres.map(function(p){
-   return '<div class="riga"><div class="riga-main"><strong>'+esc(p.nome)+'</strong><span class="riga-sub">'+esc(p.e?p.e.c:'')+'</span></div><div class="riga-orari"><span class="'+(p.e?'orario':'orario off')+'">E '+(p.e?p.e.t:'--:--')+'</span><span class="'+(p.u?'orario':'orario off')+'">U '+(p.u?p.u.t:'--:--')+'</span></div></div>';
+   var pz=(quadro.pause||{})[p.nome.toLowerCase()]||'1h';
+   var ore=oreNette(p,pz);
+   return '<div class="riga"><div class="riga-main"><strong>'+esc(p.nome)+'</strong><span class="riga-sub">'+esc(p.e?p.e.c:'')+'</span></div><div class="riga-orari"><span class="'+(p.e?'orario':'orario off')+'">E '+(p.e?p.e.t:'--:--')+'</span><span class="'+(p.u?'orario':'orario off')+'">U '+(p.u?p.u.t:'--:--')+'</span>'+(ore?'<span class="orario">Ore '+ore+'</span>':'')+'<select class="pausa-sel" title="Pausa pranzo di oggi" data-n="'+esc(p.nome)+'" onchange="salvaPausa(this.dataset.n,this.value)"><option value="1h"'+(pz==='1h'?' selected':'')+'>Pausa 1h</option><option value="30min"'+(pz==='30min'?' selected':'')+'>Pausa 30 min</option><option value="saltata"'+(pz==='saltata'?' selected':'')+'>Pausa saltata</option></select></div></div>';
  }).join('');
  renderAttrezzi();
  document.getElementById('cant-lista').innerHTML=quadro.cantieri.map(function(c){
