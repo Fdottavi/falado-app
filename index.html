@@ -52,7 +52,6 @@ caption,.cap{display:block;font-size:13px;color:var(--grigio);margin:8px 0}
 .btn{display:block;text-align:center;text-decoration:none;font-size:17px;font-weight:700;padding:14px 16px;border-radius:12px;border:none;cursor:pointer;color:var(--nero);background:#f0ece6}
 .btn-add{background:var(--verde);color:#fff}
 .btn-del{background:var(--rosso);color:#fff}
-.btn-move{background:#1565c0;color:#fff}
 .btn-ghost{background:#f0ece6;color:var(--nero)}
 .btn-small{font-size:14px;padding:8px 12px;font-weight:600}
 .btn:disabled{opacity:.6}
@@ -177,7 +176,6 @@ function carica(){
 document.getElementById('reload').onclick=carica;
 document.getElementById('cerca').oninput=renderAttrezzi;
 document.getElementById('gestione').innerHTML=
- '<a class="btn btn-move" target="_blank" rel="noopener" href="'+adminUrl('attrezzi','move')+'">Sposta attrezzo</a>'+
  '<a class="btn btn-add" target="_blank" rel="noopener" href="'+adminUrl('attrezzi','add')+'">Aggiungi attrezzo</a>'+
  '<a class="btn btn-del" target="_blank" rel="noopener" href="'+adminUrl('attrezzi','del')+'">Elimina attrezzo</a>'+
  '<a class="btn btn-add" target="_blank" rel="noopener" href="'+adminUrl('operai','add')+'">Aggiungi operaio</a>'+
