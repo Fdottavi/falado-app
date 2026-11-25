@@ -113,12 +113,12 @@ footer{margin-top:34px;font-size:12px;color:var(--grigio);text-align:center;line
 </div>
 <script>
 var EXEC='https://script.google.com/macros/s/AKfycbwxdeuurqNsT0SYGNUxdw8d_Dq-5jdFzuDph5ZEVorRhZ-3IDDaCNG79Emkq_Mda6py/exec';
-var KEY='a664941690cf2f9b01ce';
+var ADMIN='https://script.google.com/macros/s/AKfycbzvnLv9YY_Ez4HF--MYFtbMe4k0ZQEY_UkIIqpX3fGIhrAyqFCuchbU9KfUeeXx5uIt/exec';
 var PRESENZE_APP='https://files.instinct.com/4eehmq5i22l8-presenze-cantiere?c=';
 var CODICI_ESEMPIO=['ATR-001','ATR-002','ATR-003'];
 var quadro=null, foto={};
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
-function adminUrl(kind,op){return EXEC+'?action=ui&kind='+kind+'&op='+op+'&k='+KEY;}
+function adminUrl(kind,op){return ADMIN+'?action=ui&kind='+kind+'&op='+op;}
 function mapsUrl(c){var q=c.indirizzo&&c.indirizzo.trim()?c.indirizzo:c.nome;return 'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(q);}
 function statoClass(s){var v=(s||'').toLowerCase();if(v.indexOf('funz')===0)return'ok';if(v.indexOf('manut')===0)return'warn';if(v.indexOf('rott')===0)return'bad';return'none';}
 function attrezziOk(){return quadro?quadro.attrezzi.filter(function(a){return CODICI_ESEMPIO.indexOf(a.codice)===-1;}):[];}
@@ -183,7 +183,8 @@ document.getElementById('gestione').innerHTML=
  '<a class="btn btn-add" target="_blank" rel="noopener" href="'+adminUrl('operai','add')+'">Aggiungi operaio</a>'+
  '<a class="btn btn-del" target="_blank" rel="noopener" href="'+adminUrl('operai','del')+'">Elimina operaio</a>'+
  '<a class="btn btn-add" target="_blank" rel="noopener" href="'+adminUrl('cantieri','add')+'">Aggiungi cantiere</a>'+
- '<a class="btn btn-del" target="_blank" rel="noopener" href="'+adminUrl('cantieri','del')+'">Elimina cantiere</a>';
+ '<a class="btn btn-del" target="_blank" rel="noopener" href="'+adminUrl('cantieri','del')+'">Elimina cantiere</a>'+
+ '<a class="btn btn-move" target="_blank" rel="noopener" href="'+ADMIN+'?action=geo">Geolocalizzazione cantieri</a>';
 carica();
 </script>
 </body>
